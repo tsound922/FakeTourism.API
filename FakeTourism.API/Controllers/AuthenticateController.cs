@@ -37,10 +37,12 @@ namespace FakeTourism.API.Controllers
              */
             var signinAlgorithm = SecurityAlgorithms.HmacSha256;
             //payload
+            //Who owns the resource
             var claims = new[]
             {
-                //sub
-                new Claim(JwtRegisteredClaimNames.Sub, "fake_user_id")
+                //sub - define the user role
+                new Claim(JwtRegisteredClaimNames.Sub, "fake_user_id"),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             //signature

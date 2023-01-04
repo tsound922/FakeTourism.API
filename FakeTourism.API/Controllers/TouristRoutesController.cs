@@ -12,6 +12,7 @@ using FakeTourism.API.ResourceParameters;
 using FakeTourism.API.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using FakeTourism.API.Helper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FakeTourism.API.Controllers
 {
@@ -80,6 +81,7 @@ namespace FakeTourism.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTouristRoute([FromBody] TouristRouteForCreationDto touristRouteForCreationDto) 
         {
             var touristRouteFromRepo = await _touristRouteRepository.GetTouristRouteByTitleAsync(touristRouteForCreationDto.Title);
