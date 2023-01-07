@@ -78,5 +78,22 @@ namespace FakeTourism.API.Controllers
 
             return Ok(_mapper.Map<ShoppingCartDto>(shoppingCart));
         }
+
+        [HttpDelete("items/{itemId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteShoppingCartItem([FromRoute] int itemId) 
+        {
+            //1 acquire lineitem data
+            var lineItem = await _touristRouteRepository.GetShoppingCartItemByItemId(itemId);
+            if (lineItem == null) 
+            {
+                return NotFound("Cannot find the item you are looking for");
+            }
+
+            _touristRouteRepository.DeleteShoppingCartItem(lineItem);
+            await _touristRouteRepository.SaveAsync();
+
+            return Ok("Item has been removed");
+        }
     }
 }
