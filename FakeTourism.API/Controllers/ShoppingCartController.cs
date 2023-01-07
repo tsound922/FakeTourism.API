@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FakeTourism.API.Dtos;
+using FakeTourism.API.Helper;
 using FakeTourism.API.Models;
 using FakeTourism.API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -94,6 +95,20 @@ namespace FakeTourism.API.Controllers
             await _touristRouteRepository.SaveAsync();
 
             return Ok("Item has been removed");
+        }
+
+        [HttpDelete("items/({itemIDs})")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> RemoveShoppingCartItems(
+            [ModelBinder(BinderType = typeof(ArrayModelBinder))]
+            [FromRoute] IEnumerable<int> itemIDs
+        ) 
+        {
+            var lineItems = await _touristRouteRepository.GetShoppingCartItemsByIdListAsync(itemIDs);
+
+            _touristRouteRepository.DeleteSHoppingCartItems(lineItems);
+            await _touristRouteRepository.SaveAsync();
+            return Ok("Selected items have been removed");
         }
     }
 }

@@ -25,6 +25,8 @@ namespace FakeTourism.API.Services
         Task AddShoppingCartItem(LineItem lineItem);
         Task<LineItem> GetShoppingCartItemByItemId(int lineItemId);
         void DeleteShoppingCartItem(LineItem lineItem);
+        Task<IEnumerable<LineItem>> GetShoppingCartItemsByIdListAsync(IEnumerable<int> itemIDs);
+        void DeleteSHoppingCartItems(IEnumerable<LineItem> lineItems);
         Task<bool> SaveAsync();
     }
 }

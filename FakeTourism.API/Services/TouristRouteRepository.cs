@@ -139,6 +139,15 @@ namespace FakeTourism.API.Services
             _context.LineItems.Remove(lineItem);
         }
 
+        public async Task<IEnumerable<LineItem>> GetShoppingCartItemsByIdListAsync(IEnumerable<int> itemIDs) 
+        {
+            return await _context.LineItems.Where(lineItem => itemIDs.Contains(lineItem.Id)).ToListAsync();
+        }
+        public void DeleteSHoppingCartItems(IEnumerable<LineItem> lineItems) 
+        {
+            _context.LineItems.RemoveRange(lineItems);
+        }
+
         public async Task<bool> SaveAsync() 
         {
             return await _context.SaveChangesAsync() >= 0;
