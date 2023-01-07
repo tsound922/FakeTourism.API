@@ -108,6 +108,19 @@ namespace FakeTourism.API.Services
             return await _context.TouristRoutes.Where(t => ids.Contains(t.Id)).ToListAsync();
         }
 
+        public async Task<ShoppingCart> GetShoppingCartByUserId(string userId) 
+        {
+            return await _context.ShoppingCarts
+                .Include(shoppingCart => shoppingCart.User)
+                .Include(shoppingCart => shoppingCart.ShoppingCartItems).ThenInclude(lineItem => lineItem.TouristRoute)
+                .Where(shoppingCart => shoppingCart.UserId == userId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task CreateShoppingCart(ShoppingCart shoppingCart) 
+        {
+            await _context.ShoppingCarts.AddAsync(shoppingCart);
+        }
 
         public async Task<bool> SaveAsync() 
         {

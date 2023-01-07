@@ -10,6 +10,7 @@ namespace FakeTourism.API.Models
     {
         public string Address { get; set; }
         //shopping cart
+        public ShoppingCart ShoppingCart { get; set; }
         //orders
 
         public virtual ICollection<IdentityUserRole<string>> UserRoles { get; set; }
