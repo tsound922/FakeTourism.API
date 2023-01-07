@@ -122,6 +122,11 @@ namespace FakeTourism.API.Services
             await _context.ShoppingCarts.AddAsync(shoppingCart);
         }
 
+        public async Task AddShoppingCartItem(LineItem lineItem) 
+        {
+            await _context.LineItems.AddAsync(lineItem);
+        }
+
         public async Task<bool> SaveAsync() 
         {
             return await _context.SaveChangesAsync() >= 0;
