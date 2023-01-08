@@ -1,4 +1,5 @@
 ﻿using FakeTourism.API.Database;
+using FakeTourism.API.Helper;
 using FakeTourism.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -26,7 +27,7 @@ namespace FakeTourism.API.Services
             return await _context.TouristRoutes.FirstOrDefaultAsync(n => n.Title.Equals(touristRouteTitle));
         }
 
-        public async Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(
+        public async Task<PaginationList<TouristRoute>> GetTouristRoutesAsync(
             string keyword, 
             string ratingOperator, 
             int? ratingValue,
@@ -53,15 +54,7 @@ namespace FakeTourism.API.Services
                 };
             }
 
-            //pagination
-            //1 Skip some data query
-            var skip = (pageNumber - 1) * pageSize;
-            result = result.Skip(skip);
-
-            //2 list data amount based on pagesize
-            result = result.Take(pageSize);
-
-            return await result.ToListAsync();
+            return await PaginationList<TouristRoute>.CreateAsync(pageNumber, pageSize, result);
         }
 
         public async Task<bool> TouristRouteExistsAsync(Guid touristRouteId)

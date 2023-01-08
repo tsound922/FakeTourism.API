@@ -1,4 +1,5 @@
-﻿using FakeTourism.API.Models;
+﻿using FakeTourism.API.Helper;
+using FakeTourism.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,10 @@ namespace FakeTourism.API.Services
 {
     public interface ITouristRouteRepository
     {
-        Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(string keyword, string ratingOperator, int? ratingValue, int pageSize, int pageNumber);
+        Task<PaginationList<TouristRoute>> GetTouristRoutesAsync(
+            string keyword, string ratingOperator, 
+            int? ratingValue, int pageSize, 
+            int pageNumber);
         Task<TouristRoute> GetTouristRouteByIdAsync(Guid touristRouteId);
         Task<TouristRoute> GetTouristRouteByTitleAsync(string touristRouteTitle);
         Task<bool> TouristRouteExistsAsync(Guid touristRouteId);
