@@ -154,6 +154,19 @@ namespace FakeTourism.API.Services
 
         }
 
+        public async Task<IEnumerable<Order>> GetOrdersByUserId(string userId) 
+        {
+           return await _context.Orders.Where(orders => orders.UserId == userId).ToListAsync();
+        }
+
+        public async Task<Order> GetOrderById(Guid orderId) 
+        {
+            return await _context.Orders
+                .Include(order => order.OrderItems).ThenInclude(orderItem => orderItem.TouristRoute)
+                .Where(order => order.Id == orderId)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<bool> SaveAsync() 
         {
             return await _context.SaveChangesAsync() >= 0;
