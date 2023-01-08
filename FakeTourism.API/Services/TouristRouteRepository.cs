@@ -26,7 +26,13 @@ namespace FakeTourism.API.Services
             return await _context.TouristRoutes.FirstOrDefaultAsync(n => n.Title.Equals(touristRouteTitle));
         }
 
-        public async Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(string keyword, string ratingOperator, int? ratingValue)
+        public async Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(
+            string keyword, 
+            string ratingOperator, 
+            int? ratingValue,
+            int pageSize, 
+            int pageNumber
+            )
         {
             // include vs join
             IQueryable<TouristRoute> result = _context
@@ -46,6 +52,15 @@ namespace FakeTourism.API.Services
                     _ => result.Where(t => t.Rating == ratingValue),
                 };
             }
+
+            //pagination
+            //1 Skip some data query
+            var skip = (pageNumber - 1) * pageSize;
+            result = result.Skip(skip);
+
+            //2 list data amount based on pagesize
+            result = result.Take(pageSize);
+
             return await result.ToListAsync();
         }
 

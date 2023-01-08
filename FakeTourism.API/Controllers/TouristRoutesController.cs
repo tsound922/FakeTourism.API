@@ -39,7 +39,13 @@ namespace FakeTourism.API.Controllers
 
             
 
-            var touristRoutesFromRepo = await _touristRouteRepository.GetTouristRoutesAsync(paramaters.Keyword, paramaters.RatingOperator, paramaters.RatingValue);
+            var touristRoutesFromRepo = await _touristRouteRepository.GetTouristRoutesAsync(
+                paramaters.Keyword, 
+                paramaters.RatingOperator, 
+                paramaters.RatingValue,
+                paramaters.PageSize,
+                paramaters.PageNumber
+                );
             if (touristRoutesFromRepo == null || touristRoutesFromRepo.Count() <= 0) {
                 return NotFound("No Tourist routes");
             }

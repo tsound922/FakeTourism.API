@@ -8,7 +8,7 @@ namespace FakeTourism.API.Services
 {
     public interface ITouristRouteRepository
     {
-        Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(string keyword, string ratingOperator, int? ratingValue);
+        Task<IEnumerable<TouristRoute>> GetTouristRoutesAsync(string keyword, string ratingOperator, int? ratingValue, int pageSize, int pageNumber);
         Task<TouristRoute> GetTouristRouteByIdAsync(Guid touristRouteId);
         Task<TouristRoute> GetTouristRouteByTitleAsync(string touristRouteTitle);
         Task<bool> TouristRouteExistsAsync(Guid touristRouteId);

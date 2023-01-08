@@ -42,9 +42,25 @@ namespace FakeTourism.API.Models
         public string TransactionMetaData { get; set; }
         StateMachine<OrderStateEnum, OrderStateTriggerEnum> _machine;
 
+        public void PaymentProcessing() 
+        {
+            _machine.Fire(OrderStateTriggerEnum.PlaceOrder);
+        }
+
+        public void PaymentApproved() 
+        {
+            _machine.Fire(OrderStateTriggerEnum.Approve);
+        }
+
+        public void PaymentRejected() 
+        {
+            _machine.Fire(OrderStateTriggerEnum.Reject);
+        }
+
         private void StateMachineInit() 
         {
-            _machine = new StateMachine<OrderStateEnum, OrderStateTriggerEnum>(OrderStateEnum.Pending);
+            _machine = new StateMachine<OrderStateEnum, OrderStateTriggerEnum>
+                (() => State, s => State = s);
             
             _machine.Configure(OrderStateEnum.Pending)
                 .Permit(OrderStateTriggerEnum.PlaceOrder, OrderStateEnum.Processing)
