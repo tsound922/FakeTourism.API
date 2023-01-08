@@ -11,7 +11,10 @@ namespace FakeTourism.API.Models
         public string Address { get; set; }
         //shopping cart
         public ShoppingCart ShoppingCart { get; set; }
+        
         //orders
+        //One user can have more than 1 order so use ICollection
+        public ICollection<Order> Orders { get; set; }
 
         public virtual ICollection<IdentityUserRole<string>> UserRoles { get; set; }
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
