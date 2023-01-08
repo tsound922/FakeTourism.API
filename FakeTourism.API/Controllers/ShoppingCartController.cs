@@ -16,7 +16,7 @@ namespace FakeTourism.API.Controllers
 {
     [ApiController]
     [Route("api/shoppingCart")]
-    public class ShoppingCartController: ControllerBase
+    public class ShoppingCartController : ControllerBase
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITouristRouteRepository _touristRouteRepository;
@@ -26,7 +26,7 @@ namespace FakeTourism.API.Controllers
             IHttpContextAccessor httpContextAccessor,
             ITouristRouteRepository touristRouteRepository,
             IMapper mapper
-            ) 
+            )
         {
             _httpContextAccessor = httpContextAccessor;
             _touristRouteRepository = touristRouteRepository;
@@ -34,8 +34,8 @@ namespace FakeTourism.API.Controllers
 
         }
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetShoppingCart() 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetShoppingCart()
         {
             //1 acquire current user from HTTP Context
             var userId = _httpContextAccessor
@@ -60,7 +60,7 @@ namespace FakeTourism.API.Controllers
 
             //3 create line item for user
             var touristRoute = await _touristRouteRepository.GetTouristRouteByIdAsync(addShoppingCartItemDto.TouristRouteId);
-            if (touristRoute == null) 
+            if (touristRoute == null)
             {
                 return NotFound("Tourist you are looing for is not exist");
             }
@@ -82,11 +82,11 @@ namespace FakeTourism.API.Controllers
 
         [HttpDelete("items/{itemId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> DeleteShoppingCartItem([FromRoute] int itemId) 
+        public async Task<IActionResult> DeleteShoppingCartItem([FromRoute] int itemId)
         {
             //1 acquire lineitem data
             var lineItem = await _touristRouteRepository.GetShoppingCartItemByItemId(itemId);
-            if (lineItem == null) 
+            if (lineItem == null)
             {
                 return NotFound("Cannot find the item you are looking for");
             }
@@ -102,13 +102,45 @@ namespace FakeTourism.API.Controllers
         public async Task<IActionResult> RemoveShoppingCartItems(
             [ModelBinder(BinderType = typeof(ArrayModelBinder))]
             [FromRoute] IEnumerable<int> itemIDs
-        ) 
+        )
         {
             var lineItems = await _touristRouteRepository.GetShoppingCartItemsByIdListAsync(itemIDs);
 
             _touristRouteRepository.DeleteSHoppingCartItems(lineItems);
             await _touristRouteRepository.SaveAsync();
             return Ok("Selected items have been removed");
+        }
+
+        [HttpPost("checkout")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> Checkout() 
+        {
+            //1 acquire current user from HTTP Context
+            var userId = _httpContextAccessor
+                .HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            //2 use userId to acquire shopping cart
+            var shoppingCart = await _touristRouteRepository.GetShoppingCartByUserId(userId);
+
+            //3 Create order
+            var order = new Order()
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                State = OrderStateEnum.Pending,
+                OrderItems = shoppingCart.ShoppingCartItems,
+                CreateDate = DateTime.UtcNow,
+            };
+
+            //empty shopping cart list in Context
+            shoppingCart.ShoppingCartItems = null;
+
+            //4 Save order data
+            await _touristRouteRepository.AddOrderAsync(order);
+            await _touristRouteRepository.SaveAsync();
+
+            //5 return
+            return Ok(_mapper.Map<OrderDto>(order));
         }
     }
 }

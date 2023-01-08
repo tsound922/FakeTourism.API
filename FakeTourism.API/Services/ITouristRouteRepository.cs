@@ -27,6 +27,7 @@ namespace FakeTourism.API.Services
         void DeleteShoppingCartItem(LineItem lineItem);
         Task<IEnumerable<LineItem>> GetShoppingCartItemsByIdListAsync(IEnumerable<int> itemIDs);
         void DeleteSHoppingCartItems(IEnumerable<LineItem> lineItems);
+        Task AddOrderAsync(Order order);
         Task<bool> SaveAsync();
     }
 }
