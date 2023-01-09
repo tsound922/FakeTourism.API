@@ -87,7 +87,9 @@ namespace FakeTourism.API
             });
 
             //Everytime it will initialize a data repo and destory it after request
+            //Services and their interface will be registered here
             services.AddTransient<ITouristRouteRepository, TouristRouteRepository>();
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 
             //Only initialize one data repo, but
             /*services.AddSingleton();*/
@@ -103,7 +105,7 @@ namespace FakeTourism.API
 
             services.AddHttpClient();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,6 +9,7 @@ namespace FakeTourism.API.Services
 {
     public class PropertyMappingService : IPropertyMappingService
     {
+        //Dictionary<[index key],[value]>
         private Dictionary<string, PropertyMappingValue> _touristRoutePropertyMapping =
            new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
            {
