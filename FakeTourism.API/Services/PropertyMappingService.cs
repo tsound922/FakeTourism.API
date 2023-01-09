@@ -3,6 +3,7 @@ using FakeTourism.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace FakeTourism.API.Services
@@ -68,6 +69,36 @@ namespace FakeTourism.API.Services
                     ? trimmedField : trimmedField.Remove(indexOfFirstSpace);
 
                 if (!propertyMapping.ContainsKey(propertyName)) 
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool IsPropertiesExist<T>(string fields) 
+        {
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                return true;
+            }
+
+            //remove "," from query keyword string
+            var fieldsAfterSplit = fields.Split(",");
+
+            foreach (var field in fieldsAfterSplit) 
+            {
+                var propertyName = field.Trim();
+
+                var propertyInfo = typeof(T)
+                    .GetProperty(
+                        propertyName,
+                        BindingFlags.IgnoreCase | BindingFlags.Public
+                        | BindingFlags.Instance
+                    );
+
+                //If we did not find related properties in Generic type T
+                if (propertyInfo == null) 
                 {
                     return false;
                 }

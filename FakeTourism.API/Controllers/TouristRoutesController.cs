@@ -94,7 +94,12 @@ namespace FakeTourism.API.Controllers
             if (!_propertyMappingService.IsMappingKeyWordExist<TouristRouteDto, TouristRoute>(paramaters.OrderBy)) 
             {
                 return BadRequest("Please use correct keyword for information sorting");
-            } 
+            }
+
+            if (!_propertyMappingService.IsPropertiesExist<TouristRouteDto>(paramaters.Fields)) 
+            {
+                return BadRequest("Please use correct keyword for data shapping");
+            }
 
             var touristRoutesFromRepo = await _touristRouteRepository.GetTouristRoutesAsync(
                 paramaters.Keyword, 
@@ -136,13 +141,22 @@ namespace FakeTourism.API.Controllers
 
         [HttpGet("{touristRouteId}", Name = "GetTouristRouteById")]
         [HttpHead("{touristRouteId}")]
-        public async Task<IActionResult> GetTouristRouteById(Guid touristRouteId) {
+        public async Task<IActionResult> GetTouristRouteById(
+            Guid touristRouteId,
+            string fields
+            ) 
+        {
 
             //It (touristRouteFromRepo) is the original data model
             var touristRouteFromRepo = await _touristRouteRepository.GetTouristRouteByIdAsync(touristRouteId);
             
             if (touristRouteFromRepo == null ) {
                 return NotFound($"Tourist route {touristRouteId} is not found");
+            }
+
+            if (!_propertyMappingService.IsPropertiesExist<TouristRouteDto>(fields))
+            {
+                return BadRequest("Please use correct keyword for data shapping");
             }
             /*var touristRouteDto = new TouristRouteDto() {
                 Id = touristRouteFromRepo.Id,
@@ -162,7 +176,7 @@ namespace FakeTourism.API.Controllers
 
             var touristRouteDto = _mapper.Map<TouristRouteDto>(touristRouteFromRepo);
 
-            return Ok(touristRouteDto);
+            return Ok(touristRouteDto.ShapeData(fields));
            
         }
 

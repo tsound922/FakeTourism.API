@@ -6,5 +6,6 @@ namespace FakeTourism.API.Services
     {
         Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>();
         bool IsMappingKeyWordExist<TSource, TDestination>(string fields);
+        bool IsPropertiesExist<T>(string fields);
     }
 }
