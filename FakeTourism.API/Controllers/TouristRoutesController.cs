@@ -50,6 +50,7 @@ namespace FakeTourism.API.Controllers
                 ResourceUriType.PreviousPage => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
                         pageNumber = pageParamaters.PageNumber - 1,
@@ -58,6 +59,7 @@ namespace FakeTourism.API.Controllers
                 ResourceUriType.NextPage => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
                         pageNumber = pageParamaters.PageNumber + 1,
@@ -66,6 +68,7 @@ namespace FakeTourism.API.Controllers
                 _ => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
                         pageNumber = pageParamaters.PageNumber,
