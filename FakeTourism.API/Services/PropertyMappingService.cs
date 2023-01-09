@@ -43,5 +43,36 @@ namespace FakeTourism.API.Services
                 $"Cannot find exact property mapping instance for <{typeof(TSource)},{typeof(TDestination)}");
 
         }
+
+        public bool IsMappingKeyWordExist<TSource, TDestination>(string fields) 
+        {
+            var propertyMapping = GetPropertyMapping<TSource, TDestination>();
+
+            if (string.IsNullOrWhiteSpace(fields)) 
+            {
+                return true;
+            }
+
+            //remove "," from query keyword string
+            var fieldsAfterSplit = fields.Split(",");
+
+            foreach (var field in fieldsAfterSplit) 
+            {
+                //remove space in string
+                var trimmedField = field.Trim();
+
+                //Acquire property string
+                var indexOfFirstSpace = trimmedField.IndexOf(" ");
+                var propertyName = indexOfFirstSpace == -1
+                    ? trimmedField : trimmedField.Remove(indexOfFirstSpace);
+
+                if (!propertyMapping.ContainsKey(propertyName)) 
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 }

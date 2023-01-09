@@ -25,18 +25,21 @@ namespace FakeTourism.API.Controllers
         private ITouristRouteRepository _touristRouteRepository;
         private readonly IMapper _mapper;
         private readonly IUrlHelper _urlHelper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
         //Dependency injection
         public TouristRoutesController(
             ITouristRouteRepository touristRouteRepository, 
             IMapper mapper, 
             IUrlHelperFactory urlHelperFactory,
-            IActionContextAccessor actionContextAccessor
+            IActionContextAccessor actionContextAccessor,
+            IPropertyMappingService propertyMappingService
             ) 
         {
             _touristRouteRepository = touristRouteRepository;
             _mapper = mapper;
             _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
+            _propertyMappingService = propertyMappingService;
         }
 
         private string GenerateTouristRouteResourceURL(
@@ -85,7 +88,10 @@ namespace FakeTourism.API.Controllers
             string rating //less then, larger than, equal to*/
             ) {
 
-            
+            if (!_propertyMappingService.IsMappingKeyWordExist<TouristRouteDto, TouristRoute>(paramaters.OrderBy)) 
+            {
+                return BadRequest("Please use correct keyword for information sorting");
+            } 
 
             var touristRoutesFromRepo = await _touristRouteRepository.GetTouristRoutesAsync(
                 paramaters.Keyword, 
