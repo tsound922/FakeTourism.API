@@ -53,6 +53,7 @@ namespace FakeTourism.API.Controllers
                 ResourceUriType.PreviousPage => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        fileds = paramaters.Fields,
                         orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
@@ -62,6 +63,7 @@ namespace FakeTourism.API.Controllers
                 ResourceUriType.NextPage => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        fileds = paramaters.Fields,
                         orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
@@ -71,6 +73,7 @@ namespace FakeTourism.API.Controllers
                 _ => _urlHelper.Link("GetTouristRoutes",
                     new
                     {
+                        fileds = paramaters.Fields,
                         orderBy = paramaters.OrderBy,
                         keyword = paramaters.Keyword,
                         rating = paramaters.Rating,
@@ -128,7 +131,7 @@ namespace FakeTourism.API.Controllers
 
             Response.Headers.Add("x-pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetaData));
 
-            return Ok(touristRouteDto);
+            return Ok(touristRouteDto.ShapeData(paramaters.Fields));
         }
 
         [HttpGet("{touristRouteId}", Name = "GetTouristRouteById")]
