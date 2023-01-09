@@ -1,4 +1,5 @@
 ﻿using FakeTourism.API.Database;
+using FakeTourism.API.Dtos;
 using FakeTourism.API.Helper;
 using FakeTourism.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,15 @@ namespace FakeTourism.API.Services
     public class TouristRouteRepository : ITouristRouteRepository
     {
         private readonly AppDbContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public TouristRouteRepository(AppDbContext context) {
+        public TouristRouteRepository(
+            AppDbContext context,
+            IPropertyMappingService propertyMappingService
+            ) 
+        {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         public async Task<TouristRoute> GetTouristRouteByIdAsync(Guid touristRouteId)
@@ -32,7 +39,8 @@ namespace FakeTourism.API.Services
             string ratingOperator, 
             int? ratingValue,
             int pageSize, 
-            int pageNumber
+            int pageNumber,
+            string orderBy
             )
         {
             // include vs join
@@ -52,6 +60,13 @@ namespace FakeTourism.API.Services
                     "lessThan" => result.Where(t => t.Rating <= ratingValue),
                     _ => result.Where(t => t.Rating == ratingValue),
                 };
+            }
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                var touristRouteMappingDictionary = _propertyMappingService.GetPropertyMapping<TouristRouteDto, TouristRoute>();
+
+                result = result.ApplySort(orderBy, touristRouteMappingDictionary);
             }
 
             return await PaginationList<TouristRoute>.CreateAsync(pageNumber, pageSize, result);

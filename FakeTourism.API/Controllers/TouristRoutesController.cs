@@ -89,7 +89,8 @@ namespace FakeTourism.API.Controllers
                 paramaters.RatingOperator, 
                 paramaters.RatingValue,
                 pageParamaters.PageSize,
-                pageParamaters.PageNumber
+                pageParamaters.PageNumber,
+                paramaters.OrderBy
                 );
             if (touristRoutesFromRepo == null || touristRoutesFromRepo.Count() <= 0) {
                 return NotFound("No Tourist routes");

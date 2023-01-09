@@ -12,7 +12,7 @@ namespace FakeTourism.API.Services
         Task<PaginationList<TouristRoute>> GetTouristRoutesAsync(
             string keyword, string ratingOperator, 
             int? ratingValue, int pageSize, 
-            int pageNumber);
+            int pageNumber, string orderBy);
         Task<TouristRoute> GetTouristRouteByIdAsync(Guid touristRouteId);
         Task<TouristRoute> GetTouristRouteByTitleAsync(string touristRouteTitle);
         Task<bool> TouristRouteExistsAsync(Guid touristRouteId);
