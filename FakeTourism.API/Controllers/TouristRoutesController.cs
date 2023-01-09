@@ -32,7 +32,8 @@ namespace FakeTourism.API.Controllers
         [HttpGet]
         [HttpHead]
         public async Task<IActionResult> GetTouristRoutes(
-            [FromQuery] TouristRouteResourceParamaters paramaters
+            [FromQuery]TouristRouteResourceParamaters paramaters,
+            [FromQuery]PaginationResourceParamaters pageParamaters 
             /*[FromQuery] string keyword,
             string rating //less then, larger than, equal to*/
             ) {
@@ -43,8 +44,8 @@ namespace FakeTourism.API.Controllers
                 paramaters.Keyword, 
                 paramaters.RatingOperator, 
                 paramaters.RatingValue,
-                paramaters.PageSize,
-                paramaters.PageNumber
+                pageParamaters.PageSize,
+                pageParamaters.PageNumber
                 );
             if (touristRoutesFromRepo == null || touristRoutesFromRepo.Count() <= 0) {
                 return NotFound("No Tourist routes");

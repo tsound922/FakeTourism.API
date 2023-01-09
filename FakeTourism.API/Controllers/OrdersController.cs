@@ -12,6 +12,7 @@ using FakeTourism.API.Dtos;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using FakeTourism.API.ResourceParameters;
 
 namespace FakeTourism.API.Controllers
 {
@@ -41,14 +42,20 @@ namespace FakeTourism.API.Controllers
 
         [HttpGet]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetOrders() 
+        public async Task<IActionResult> GetOrders(
+             [FromQuery] PaginationResourceParamaters pageParamaters
+            ) 
         {
             //1 acquire current user from HTTP Context
             var userId = _httpContextAccessor
                 .HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             //2 get histroy order from user id
-            var orders = await _touristRouteRepository.GetOrdersByUserId(userId);
+            var orders = await _touristRouteRepository.GetOrdersByUserId(userId, pageParamaters.PageSize, pageParamaters.PageNumber);
+            if (orders.LongCount() == 0) 
+            {
+                return NotFound("Orders are not found");
+            }
             return Ok(_mapper.Map<IEnumerable<OrderDto>>(orders));
         }
 
