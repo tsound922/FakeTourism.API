@@ -8,13 +8,19 @@ namespace FakeTourism.API.Helper
 {
     public class PaginationList<T>: List<T>
     {
+        public int TotalPages { get; set; }
+        public int TotalCount { get; set; }
+        public bool HasPrevious => CurrentPage > 1;
+        public bool HasNext => CurrentPage < TotalPages;
         public int CurrentPage { get; set; }
         public int PageSize { get; set; }
-        public PaginationList(int currentPage, int pageSize, List<T> items) 
+        public PaginationList(int totalCount, int currentPage, int pageSize, List<T> items) 
         {
             CurrentPage = currentPage;
             PageSize = pageSize;
             AddRange(items);
+            TotalCount = totalCount;
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         }
 
         //Factory PATTERN
@@ -24,6 +30,8 @@ namespace FakeTourism.API.Helper
             IQueryable<T> result
             ) 
         {
+            var totalCount = await result.CountAsync();
+
             //pagination
             //1 Skip some data query
             var skip = (currentPage - 1) * pageSize;
@@ -35,7 +43,7 @@ namespace FakeTourism.API.Helper
             var item = await result.ToListAsync();
 
 
-            return new PaginationList<T>(currentPage, pageSize, item);
+            return new PaginationList<T>(totalCount, currentPage, pageSize, item);
         }
 
     }

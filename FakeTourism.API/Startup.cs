@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using FakeTourism.API.Models;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace FakeTourism.API
 {
@@ -101,6 +102,7 @@ namespace FakeTourism.API
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddHttpClient();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

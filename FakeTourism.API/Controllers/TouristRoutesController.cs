@@ -13,6 +13,8 @@ using FakeTourism.API.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using FakeTourism.API.Helper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace FakeTourism.API.Controllers
 {
@@ -21,15 +23,57 @@ namespace FakeTourism.API.Controllers
     public class TouristRoutesController : ControllerBase
     {
         private ITouristRouteRepository _touristRouteRepository;
-        private IMapper _mapper;
+        private readonly IMapper _mapper;
+        private readonly IUrlHelper _urlHelper;
 
         //Dependency injection
-        public TouristRoutesController(ITouristRouteRepository touristRouteRepository, IMapper mapper) {
+        public TouristRoutesController(
+            ITouristRouteRepository touristRouteRepository, 
+            IMapper mapper, 
+            IUrlHelperFactory urlHelperFactory,
+            IActionContextAccessor actionContextAccessor
+            ) 
+        {
             _touristRouteRepository = touristRouteRepository;
             _mapper = mapper;
+            _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
         }
 
-        [HttpGet]
+        private string GenerateTouristRouteResourceURL(
+            TouristRouteResourceParamaters paramaters,
+            PaginationResourceParamaters pageParamaters,
+            ResourceUriType type
+            ) 
+        {
+            return type switch
+            {
+                ResourceUriType.PreviousPage => _urlHelper.Link("GetTouristRoutes",
+                    new
+                    {
+                        keyword = paramaters.Keyword,
+                        rating = paramaters.Rating,
+                        pageNumber = pageParamaters.PageNumber - 1,
+                        pageSize = pageParamaters.PageSize
+                    }),
+                ResourceUriType.NextPage => _urlHelper.Link("GetTouristRoutes",
+                    new
+                    {
+                        keyword = paramaters.Keyword,
+                        rating = paramaters.Rating,
+                        pageNumber = pageParamaters.PageNumber + 1,
+                        pageSize = pageParamaters.PageSize
+                    }),
+                _ => _urlHelper.Link("GetTouristRoutes",
+                    new
+                    {
+                        keyword = paramaters.Keyword,
+                        rating = paramaters.Rating,
+                        pageNumber = pageParamaters.PageNumber,
+                        pageSize = pageParamaters.PageSize
+                    })
+            };
+        }
+        [HttpGet(Name = "GetTouristRoutes")]
         [HttpHead]
         public async Task<IActionResult> GetTouristRoutes(
             [FromQuery]TouristRouteResourceParamaters paramaters,
@@ -52,6 +96,28 @@ namespace FakeTourism.API.Controllers
             }
 
             var touristRouteDto = _mapper.Map<IEnumerable<TouristRouteDto>>(touristRoutesFromRepo);
+
+            var previousPageLink = touristRoutesFromRepo.HasPrevious
+                ? GenerateTouristRouteResourceURL(paramaters, pageParamaters, ResourceUriType.PreviousPage)
+                : null;
+
+            var nextPageLink = touristRoutesFromRepo.HasNext
+                ? GenerateTouristRouteResourceURL(paramaters, pageParamaters, ResourceUriType.NextPage)
+                : null;
+
+            // Add x-pagination at header
+            var paginationMetaData = new
+            {
+                previousPageLink,
+                nextPageLink,
+                totalCount = touristRoutesFromRepo.TotalCount,
+                pageSize = touristRoutesFromRepo.PageSize,
+                current = touristRoutesFromRepo.CurrentPage,
+                totalPages = touristRoutesFromRepo.TotalPages
+            };
+
+            Response.Headers.Add("x-pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetaData));
+
             return Ok(touristRouteDto);
         }
 
