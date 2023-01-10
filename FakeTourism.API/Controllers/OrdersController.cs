@@ -40,7 +40,7 @@ namespace FakeTourism.API.Controllers
         }
 
 
-        [HttpGet]
+        [HttpGet(Name = "GetOrders")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetOrders(
              [FromQuery] PaginationResourceParamaters pageParamaters
