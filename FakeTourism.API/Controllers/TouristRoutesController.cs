@@ -15,6 +15,8 @@ using FakeTourism.API.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Net.Http.Headers;
+using System.Dynamic;
 
 namespace FakeTourism.API.Controllers
 {
@@ -108,15 +110,33 @@ namespace FakeTourism.API.Controllers
             return links;
         }
 
+        //api/touristroutes?keyword=
+        //1 application/json -> tourist route resource
+        //2 application/vnd.{your corp name}.hateoas+json
+        //3 application/vnd.{your corp name}.touristRoute.simplify+json
+        //4 application/vnd.{your corp name}.touristRoute.simplify.hateoas+json
 
+        [Produces(
+            "application/json",
+            "application/vnd.isaacw.hateoas+json",
+            "application/vnd.isaacw.touristRoute.simplify+json",
+            "application/vnd.isaacw.touristRoute.simplify.hateoas+json"
+            )]
         [HttpGet(Name = "GetTouristRoutes")]
         [HttpHead]
         public async Task<IActionResult> GetTouristRoutes(
             [FromQuery]TouristRouteResourceParamaters paramaters,
-            [FromQuery]PaginationResourceParamaters pageParamaters 
+            [FromQuery]PaginationResourceParamaters pageParamaters,
+            [FromHeader(Name = "Accept")] string mediaType
             /*[FromQuery] string keyword,
             string rating //less then, larger than, equal to*/
-            ) {
+            ) 
+        {
+            if (!MediaTypeHeaderValue
+                .TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType)) 
+            {
+                return BadRequest();
+            }
 
             if (!_propertyMappingService.IsMappingKeyWordExist<TouristRouteDto, TouristRoute>(paramaters.OrderBy)) 
             {
@@ -140,7 +160,7 @@ namespace FakeTourism.API.Controllers
                 return NotFound("No Tourist routes");
             }
 
-            var touristRouteDto = _mapper.Map<IEnumerable<TouristRouteDto>>(touristRoutesFromRepo);
+            
 
             var previousPageLink = touristRoutesFromRepo.HasPrevious
                 ? GenerateTouristRouteResourceURL(paramaters, pageParamaters, ResourceUriType.PreviousPage)
@@ -163,25 +183,62 @@ namespace FakeTourism.API.Controllers
 
             Response.Headers.Add("x-pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetaData));
 
-            var shapedDtoList = touristRouteDto.ShapeData(paramaters.Fields);
+            bool isHateoas = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
-            var linkDto = CreateLinksForTouristRouteList(paramaters, pageParamaters);
+            var primaryMediaType = isHateoas
+                ? parsedMediaType.SubTypeWithoutSuffix
+                    .Substring(0, parsedMediaType.SubTypeWithoutSuffix.Length - 8)
+                : parsedMediaType.SubTypeWithoutSuffix;
 
-            var shapedDtoWithLinkList = shapedDtoList.Select(touristRoute =>
+            /*var touristRouteDto = _mapper.Map<IEnumerable<TouristRouteDto>>(touristRoutesFromRepo);
+
+            var shapedDtoList = touristRouteDto.ShapeData(paramaters.Fields);*/
+
+            IEnumerable<object> touristRouteDto;
+            IEnumerable<ExpandoObject> shapedDtoList;
+
+            if (primaryMediaType == "vnd.isaacw.touristRoute.simplify")
             {
-                var touristRouteDictionary = touristRoute as IDictionary<string, object>;
-                var links = CreateLinkForTouristRoute((Guid)touristRouteDictionary["Id"], null);
-                touristRouteDictionary.Add("links", links);
-                return touristRouteDictionary;
-            });
+                touristRouteDto = _mapper
+                    .Map<IEnumerable<TouristRouteSimplifyDto>>(touristRoutesFromRepo);
 
-            var result = new
+                shapedDtoList = ((IEnumerable<TouristRouteSimplifyDto>)touristRouteDto)
+                    .ShapeData(paramaters.Fields);
+            }
+            else 
             {
-                value = shapedDtoWithLinkList,
-                links = linkDto
-            };
+                touristRouteDto = _mapper
+                    .Map<IEnumerable<TouristRouteDto>>(touristRoutesFromRepo);
+                shapedDtoList =
+                    ((IEnumerable<TouristRouteDto>)touristRouteDto)
+                    .ShapeData(paramaters.Fields);
+            }
 
-            return Ok(result);
+
+            if (isHateoas) 
+            {
+                var linkDto = CreateLinksForTouristRouteList(paramaters, pageParamaters);
+
+                var shapedDtoWithLinkList = shapedDtoList.Select(touristRoute =>
+                {
+                    var touristRouteDictionary = touristRoute as IDictionary<string, object>;
+                    var links = CreateLinkForTouristRoute(
+                        (Guid)touristRouteDictionary["Id"], null);
+                    touristRouteDictionary.Add("links", links);
+                    return touristRouteDictionary;
+                });
+
+                var result = new
+                {
+                    value = shapedDtoWithLinkList,
+                    links = linkDto
+                };
+
+                return Ok(result);
+            }
+            return Ok(shapedDtoList);
+            
         }
 
         [HttpGet("{touristRouteId}", Name = "GetTouristRouteById")]

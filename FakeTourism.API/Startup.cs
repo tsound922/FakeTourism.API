@@ -105,7 +105,15 @@ namespace FakeTourism.API
 
             services.AddHttpClient();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            
+            services.Configure<MvcOptions>(config =>
+            {
+                var outPutFormatter = config.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+                if (outPutFormatter != null) 
+                {
+                    outPutFormatter.SupportedMediaTypes.Add("application/vnd.isaacw.hateoas+json");
+                }
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
