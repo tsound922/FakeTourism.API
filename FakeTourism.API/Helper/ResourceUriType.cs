@@ -8,6 +8,7 @@ namespace FakeTourism.API.Helper
     public enum ResourceUriType
     {
         PreviousPage,
+        CurrentPage,
         NextPage
     }
 }

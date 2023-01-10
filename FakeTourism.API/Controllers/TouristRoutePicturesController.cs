@@ -25,7 +25,7 @@ namespace FakeTourism.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPictureListForTouristRoute")]
         public async Task<IActionResult> GetPictureListForTouristRoute(Guid touristRouteId)
         {
             if (!(await _touristRouteRepository.TouristRouteExistsAsync(touristRouteId)))
@@ -59,7 +59,7 @@ namespace FakeTourism.API.Controllers
             return Ok(_mapper.Map<TouristRoutePictureDto>(pictureFromRepo));
         }
         
-        [HttpPost]
+        [HttpPost(Name = "CreateTouristROutePicture")]
         public async Task<IActionResult> CreateTouristROutePicture(
             [FromRoute] Guid touristRouteId,
             [FromBody] TouristRoutePictureForCreationDto touristRoutePictureForCreationDto
@@ -84,7 +84,7 @@ namespace FakeTourism.API.Controllers
                 );
         }
 
-        [HttpDelete("{pictureId}")]
+        [HttpDelete("{pictureId}", Name = "DeletePicture")]
         public async Task<IActionResult> DeletePicture(
             [FromRoute]Guid touristRouteId, 
             [FromRoute]int pictureId) 
